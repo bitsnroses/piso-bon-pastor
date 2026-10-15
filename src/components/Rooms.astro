@@ -1,0 +1,33 @@
+---
+// Block 6. One card per room: photo and one line under it. 1 column, 2 from 600 px (E4, E8).
+import { render, type CollectionEntry } from "astro:content";
+import Photo from "./Photo.astro";
+import { inline } from "../lib/typography.mjs";
+
+interface Props { block: CollectionEntry<"blocks">; ui: { enlarge: string } }
+const { block, ui } = Astro.props;
+const b = block.data;
+if (b.type !== "rooms") throw new Error("Rooms expects a rooms block");
+const { Content } = await render(block);
+const rooms = b.rooms.map((r) => {
+  if (!r.text.startsWith(r.name)) throw new Error(`06: "${r.text}" has to start with its name "${r.name}"`);
+  return { ...r, rest: r.text.slice(r.name.length) };
+});
+---
+<section id={b.anchor} class="block" aria-labelledby={`${b.anchor}-h`}>
+  <div class="col">
+    <h2 class="h-title" id={`${b.anchor}-h`} set:html={inline(b.title)} />
+    <div class="prose"><Content /></div>
+  </div>
+  <div class="band">
+    <ul class="rooms" data-gallery>
+      {rooms.map((r) => (
+        <li>
+          <Photo photo={{ ...r, caption: r.text }} caption={false} sizes="(min-width: 68rem) 33rem, (min-width: 37.5rem) 48vw, calc(100vw - 2rem)" enlarge={ui.enlarge} />
+          <p><strong set:html={inline(r.name)} /><Fragment set:html={inline(r.rest)} /></p>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <slot />
+</section>

@@ -1,0 +1,72 @@
+---
+// Block 8 (ADR-003). The list is the information; the map places it. The base (streets, river,
+// railway, parks) comes from OpenStreetMap through scripts/map_base.py in the workspace and is a
+// static file in src/assets/mapa/. Rings, portal and points are drawn here from the frontmatter.
+// Markers and labels are HTML laid over the SVG in %, so they keep their pixel size, with no JS.
+import { render, type CollectionEntry } from "astro:content";
+import MapIcons from "./MapIcons.astro";
+import { project, toPercent, VIEW, RING_SPEED, type LatLon } from "../lib/map";
+import { fill, inline, nbsp } from "../lib/typography.mjs";
+
+interface Props { block: CollectionEntry<"blocks">; portal: LatLon }
+const { block, portal } = Astro.props;
+const b = block.data;
+if (b.type !== "neighbourhood") throw new Error("Neighbourhood expects a neighbourhood block");
+const { Content } = await render(block);
+
+type Base = { origin: [number, number]; layers: Record<string, string> };
+const bases = import.meta.glob<{ default: Base }>("../assets/mapa/base.json", { eager: true });
+const base = Object.values(bases)[0]?.default;
+if (base && (Math.abs(base.origin[0] - portal.lat) > 1e-6 || Math.abs(base.origin[1] - portal.lon) > 1e-6)) {
+  throw new Error("src/assets/mapa/base.json was drawn around another origin than datos.yaml portal");
+}
+const LAYERS = ["green", "water", "river", "paths", "minor", "mid", "major", "rail"];
+const at = (p: LatLon) => toPercent(project(p, portal));
+const pos = ([x, y]: [number, number]) => `left:${x.toFixed(2)}%;top:${y.toFixed(2)}%`;
+const portalAt = at(portal);
+---
+<section id={b.anchor} class="block" aria-labelledby={`${b.anchor}-h`}>
+  <MapIcons />
+  <div class="col">
+    <h2 class="h-title" id={`${b.anchor}-h`} set:html={inline(b.title)} />
+    <div class="prose"><Content /></div>
+  </div>
+  <div class="band">
+    <div class="map-wrap">
+      <figure class="map" aria-labelledby={`${b.anchor}-map`}>
+        <svg viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.w} ${VIEW.h}`} aria-hidden="true" focusable="false">
+          {base && LAYERS.filter((l) => base.layers[l]).map((l) => <path class={`l-${l}`} d={base.layers[l]} />)}
+          {b.rings.map((m) => <circle class="ring" cx="0" cy="0" r={m * RING_SPEED} />)}
+        </svg>
+        {b.labels.map((l) => <><span class="map-tag" style={pos(at(l))} aria-hidden="true">{l.text}</span>{" "}</>)}
+        {b.rings.map((m) => (
+          <><span class="map-tag is-ring" style={pos(toPercent([0, -m * RING_SPEED]))} aria-hidden="true">{nbsp(fill(b.ring_label, { min: m }))}</span>{" "}</>
+        ))}
+        {b.points.map((p) => (
+          <span class="map-pin" style={pos(at(p))} title={`${p.name}, ${p.minutes} ${b.unit}`} aria-hidden="true">
+            <svg class="icon"><use href={`#i-${p.icon}`} /></svg>
+          </span>
+        ))}
+        <span class="map-pin is-portal" style={pos(portalAt)} title={b.portal_label} aria-hidden="true">
+          <svg class="icon"><use href="#i-casa" /></svg>
+        </span>
+        {" "}<span class="map-attr"><a href={b.attribution_url}>{b.attribution}</a></span>
+        <figcaption class="sr-only" id={`${b.anchor}-map`}>{b.map_title}</figcaption>
+      </figure>
+      <div>
+        <ol class="places">
+          {b.points.map((p) => (
+            <li>
+              <span class="pin" aria-hidden="true"><svg class="icon"><use href={`#i-${p.icon}`} /></svg></span>
+              <span><span class="name" set:html={inline(p.name)} />{" "}<span class="small cat">{p.category}</span></span>{" "}
+              <span class="min">{p.minutes}<small>{"\u00A0"}{b.unit}</small></span>
+            </li>
+          ))}
+        </ol>
+        <p class="small mt-3" set:html={inline(b.source)} />
+        <p class="small mt-1" set:html={inline(b.rings_note)} />
+      </div>
+    </div>
+  </div>
+  <slot />
+</section>

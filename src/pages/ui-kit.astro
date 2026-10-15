@@ -1,0 +1,239 @@
+---
+// UI kit (WDP 10-mockup §1.2): every component and every state together, to catch what the page
+// alone cannot show. A working page: noindex, not linked from the site, specimen labels written
+// here on purpose (it is not visitor content). Real content wherever a component takes content.
+import Base from "../layouts/Base.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import LangSwitch from "../components/LangSwitch.astro";
+import KeyFacts from "../components/KeyFacts.astro";
+import Gallery from "../components/Gallery.astro";
+import Rooms from "../components/Rooms.astro";
+import Fold from "../components/Fold.astro";
+import Connections from "../components/Connections.astro";
+import MapIcons from "../components/MapIcons.astro";
+import CtaBar from "../components/CtaBar.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Viewer from "../components/Viewer.astro";
+import { Image } from "astro:assets";
+import { formatDate, formatPrice, loadPage, url } from "../lib/site";
+import { ratio } from "../lib/contrast";
+import { inline, plain } from "../lib/typography.mjs";
+
+const { datos, comun, block } = await loadPage("es");
+const c = comun.data;
+const price = formatPrice(datos.price, "es");
+const azotea = block("05-azotea", "gallery");
+const piso = block("06-piso", "rooms");
+const barrio = block("08-barrio", "neighbourhood");
+
+// Every pair that reaches the screen, measured at build time. "new" = combinations E8 introduced.
+const A = { 50: "#FDF6EA", 100: "#F4ECDE", 200: "#E4DBCE", 300: "#CFC6BA", 700: "#6B635D", 800: "#554D47", 950: "#2B2320" };
+const T = { 200: "#FBD2C6", 300: "#F6B5A4", 400: "#E79680", 600: "#BA634B", 700: "#974C38", 800: "#773A2A" };
+const LIME = "#E1F56E";
+const pairs: [string, string, string, number, string, boolean][] = [
+  ["ink / surface", A[950], A[50], 4.5, "Texto, títulos, cifras", false],
+  ["ink-soft / surface", A[700], A[50], 4.5, "Pies, fuentes, etiquetas", false],
+  ["link / surface", T[700], A[50], 4.5, "Enlaces", false],
+  ["marker / surface", T[600], A[50], 3, "Filete, viñeta, + del pliegue, subrayado del glosario", false],
+  ["focus-ring / surface", T[800], A[50], 3, "Anillo de foco", false],
+  ["ink / surface-quiet", A[950], A[100], 4.5, "Glosa del glosario", true],
+  ["ink-soft / surface-quiet", A[700], A[100], 4.5, "Borde del botón Cerrar de la glosa", true],
+  ["marker / surface-quiet", T[600], A[100], 3, "Filete superior de la glosa", true],
+  ["focus-ring / surface-quiet", T[800], A[100], 3, "Foco dentro de la glosa", true],
+  ["link / surface (hover del resumen)", T[700], A[50], 4.5, "Resumen del pliegue al pasar el ratón", true],
+  ["on-brand / brand", A[950], LIME, 4.5, "Texto del botón de idealista", false],
+  ["brand-edge / surface", A[950], A[50], 3, "Borde del botón flotante", false],
+  ["brand / zone", LIME, A[950], 3, "Botón en la barra y en la llamada final", false],
+  ["on-zone / zone", A[100], A[950], 4.5, "Texto en zona", false],
+  ["on-zone-soft / zone", A[300], A[950], 4.5, "Texto secundario en zona, botones del visor", false],
+  ["on-zone-figure / zone", T[300], A[950], 4.5, "Tiempos de conexión", false],
+  ["on-zone-link / zone", T[200], A[950], 4.5, "Enlaces en zona", false],
+  ["on-zone-focus / zone", A[50], A[950], 3, "Anillo de foco en zona", false],
+  ["on-zone-rule / zone", A[800], A[950], 1, "Filete entre tiempos (decorativo)", true],
+  ["pin edge / map ground", A[50], A[950], 3, "Borde e icono de los puntos del mapa", false],
+  ["map ring / map ground", T[400], A[950], 3, "Anillos", false],
+  ["map ring label / map ground", T[300], A[950], 4.5, "Rótulo de anillo", false],
+  ["map label / map ground", A[300], A[950], 4.5, "Rótulos de lugar, atribución", false],
+  ["pin / surface (lista)", A[950], A[50], 3, "Círculo del icono en la lista", true],
+  ["focus ring, dark inside / brand", A[950], LIME, 3, "Anillo doble del botón flotante, por dentro", true],
+  ["focus ring, light outside / ink", A[50], A[950], 3, "Anillo doble, por fuera, sobre foto oscura", true],
+];
+const rows = pairs.map(([name, fg, bg, min, use, isNew]) => ({ name, fg, bg, min, use, isNew, r: ratio(fg, bg) }));
+const tokens = ["surface", "surface-quiet", "ink", "ink-soft", "rule", "marker", "link", "focus-ring", "brand", "on-brand", "zone", "on-zone", "on-zone-soft", "on-zone-figure", "on-zone-link", "on-zone-rule", "on-zone-focus"];
+---
+<Base lang="es" locale="es_ES" title="UI kit, piso-bon-pastor" description="Componentes y estados de la página, juntos." canonical={new URL(url("/ui-kit/"), Astro.site)}>
+  <style is:global>
+    .kit-label { font: 600 0.75rem/1.3 var(--font-sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ink-soft); margin: 2.5rem 0 0.75rem; }
+    .zone .kit-label { color: var(--color-on-zone-soft); }
+    .kit-row { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; }
+    .kit-swatch { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0.25rem 0.75rem; align-items: center; font-size: var(--text-small); }
+    .kit-swatch i { width: 2.5rem; height: 2.5rem; border-radius: var(--radius-xs); border: 1px solid var(--color-rule); }
+    .kit-table { width: 100%; border-collapse: collapse; font-size: var(--text-small); }
+    .kit-table th, .kit-table td { text-align: left; padding: 0.4rem 0.5rem 0.4rem 0; border-bottom: 1px solid var(--color-rule); vertical-align: top; }
+    .kit-table .ok { color: #17603C; font-weight: 700; }
+    .kit-table .bad { color: #B8251F; font-weight: 700; }
+    .kit-wrap { overflow-x: auto; }
+    /* Forced states, so they can be seen side by side. Same rules as the real states. */
+    .kit-focus { outline: 3px solid var(--color-focus-ring); outline-offset: 3px; border-radius: var(--radius-xs); }
+    .zone .kit-focus { outline-color: var(--color-on-zone-focus); }
+    a.kit-hover { text-decoration-thickness: 2px; }
+    .cta.kit-hover::after { transform: translateX(3px); }
+    .cta.kit-active { transform: translateY(1px); }
+    .cta.kit-double { outline: 3px solid var(--color-arena-950); outline-offset: 0; box-shadow: 0 0 0 5px var(--color-arena-50), var(--shadow-float); }
+    .kit-photo-under { position: relative; display: flex; justify-content: center; align-items: flex-end; padding: 1rem; aspect-ratio: 16 / 7; overflow: hidden; border-radius: var(--radius-xs); }
+    .kit-photo-under img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .kit-photo-under .cta { position: relative; box-shadow: var(--shadow-float); min-width: 16rem; }
+    .kit-gloss { position: static; display: block; max-width: none; margin: 0.75rem 0 0; }
+    .kit-bar { position: static; }
+    .kit-viewer { position: relative; height: 22rem; border-radius: var(--radius-xs); overflow: hidden; }
+    .kit-viewer .viewer-inner { height: 100%; }
+    .kit-viewer img { max-height: 100%; }
+    .kit-map-empty { aspect-ratio: 4 / 3; }
+    .kit-fold-open { border-block: 1px solid var(--color-rule); margin: -1.5rem 0 1.5rem; border-top: 0; }
+    .kit-summary { font-size: var(--text-fold); line-height: var(--text-fold--line-height); font-weight: 600; display: flex; gap: 0.6em; align-items: baseline; padding: 0.85rem 0; margin: 0; }
+    .kit-summary::before { content: "\2212"; font-family: var(--font-display); font-weight: 400; color: var(--color-marker); font-size: 1.4em; line-height: 0.8; width: 0.7em; flex: none; }
+  </style>
+
+  <SiteHeader logo={c.logo} label={c.logo_label} home={url("/")} />
+
+  <main class="col pb-24 pt-20">
+    <h1 class="h-display">UI kit</h1>
+    <p class="small">Página de trabajo de E8, con <code>noindex</code> y sin enlaces desde la web. Todo lo que la página usa, junto y con sus estados.</p>
+
+    <p class="kit-label">Cabecera: notch fijo arriba, en tierra; con el conmutador de idioma (solo cuando exista /ca/); alternativa en papel; foco</p>
+    <div class="kit-row" style="background:var(--color-arena-200);padding:0 0 1rem">
+      <SiteHeader logo={c.logo} label={c.logo_label} home={url("/")} fixed={false} />
+      <SiteHeader logo={c.logo} label={c.logo_label} home={url("/")} fixed={false}><LangSwitch current="es" langs={["es", "ca"]} slot="lang" /></SiteHeader>
+      <SiteHeader logo={c.logo} label={c.logo_label} home={url("/")} fixed={false} variant="paper" />
+    </div>
+    <div class="kit-row mt-3"><span class="notch zone is-static"><a class="logo kit-focus" href={url("/")}>Estadella <b>41</b></a></span></div>
+
+    <p class="kit-label">Tokens de propósito</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      {tokens.map((t) => <div class="kit-swatch"><i style={`background:var(--color-${t})`}></i><code>{t}</code></div>)}
+    </div>
+
+    <p class="kit-label">Contrastes medidos al compilar (nuevas = combinaciones que aparecen en E8)</p>
+    <div class="kit-wrap">
+      <table class="kit-table">
+        <thead><tr><th>Par</th><th>Hex</th><th>Ratio</th><th>Mínimo</th><th>Uso</th></tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr>
+              <td>{r.name}{r.isNew && <strong> (nueva)</strong>}</td>
+              <td><code>{r.fg} / {r.bg}</code></td>
+              <td class={r.r >= r.min ? "ok" : "bad"}>{r.r.toFixed(2)}</td>
+              <td>{r.min === 1 ? "decorativo" : r.min}</td>
+              <td>{r.use}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="kit-label">Tipografía: peldaños</p>
+    <p class="h-display">Un salón grande y una azotea al sol</p>
+    <h2 class="h-title mt-6">Título de bloque (h2), con su filete</h2>
+    <h2 class="h-title is-quiet">Título discreto (h2, Para invertir)</h2>
+    <h3 class="h-subtitle mt-0">Subtítulo (h3)</h3>
+    <p><span class="figure-xl">{price}</span></p>
+    <p><span class="figure" set:html={inline("80 m<sup>2</sup>")} /> <span class="figure">9<small class="small"> min</small></span></p>
+    <div class="prose">
+      <p set:html={inline("Texto corrido a 17 y 18 px, interlineado 1,6, columna de 36rem. Superficies con superíndice: 74 m<sup>2</sup>; emisiones con subíndice: 26 kg CO<sub>2</sub>/m<sup>2</sup>. El espacio entre cifra y unidad no se parte: 279.000 €, 9 min, 30 %. En negrita: <sup>2</sup>")} />
+      <p class="small">Pequeño: pies de foto, fuentes, etiquetas y pie de página, 14 px.</p>
+    </div>
+
+    <p class="kit-label">Enlaces: normal, hover, foco, visitado (igual que normal)</p>
+    <div class="kit-row">
+      <a href="#enlaces">Gaseta Municipal</a>
+      <a href="#enlaces" class="kit-hover">hover</a>
+      <a href="#enlaces" class="kit-focus">foco</a>
+    </div>
+
+    <p class="kit-label">Texto corrido del .md: lista, tabla, negrita, enlace, glosario</p>
+    <div class="prose">
+      <ul><li>Armarios</li><li>Lavadora, de 2026</li><li>Radiador eléctrico de pared del salón</li></ul>
+      <table><thead><tr><th>Estancia</th><th>Superficie</th></tr></thead><tbody><tr><td>Salón</td><td set:html={inline("29,65 m<sup>2</sup>")} /></tr><tr><td><strong>Total útil</strong></td><td><strong set:html={inline("65,09 m<sup>2</sup>")} /></td></tr></tbody></table>
+      <p>Término del glosario: es de <button type="button" class="term" popovertarget="kit-gloss">uso exclusivo</button><span class="term-gloss" id="kit-gloss" popover><strong>Uso exclusivo:</strong> {c.glossary[0].gloss} <button type="button" class="term-close" popovertarget="kit-gloss" popovertargetaction="hide">{c.ui.close}</button></span> de esta vivienda (tócalo). Con foco: <button type="button" class="term kit-focus">uso exclusivo</button>.</p>
+    </div>
+    <p class="small">La glosa abierta, tal como sale abajo de la pantalla:</p>
+    <span class="term-gloss kit-gloss"><strong>Uso exclusivo:</strong> {c.glossary[0].gloss} <button type="button" class="term-close">{c.ui.close}</button></span>
+
+    <p class="kit-label">Datos clave</p>
+  </main>
+  <KeyFacts block={block("03-datos", "facts")} price={price} />
+
+  <div class="col"><p class="kit-label">Pliegue: cerrado, abierto, con foco; dos seguidos se unen</p></div>
+  <div class="col">
+    <Fold block={block("05-1-escritura", "fold")} ui={c.ui} />
+    <div class="fold kit-fold-open"><p class="kit-summary">Abierto (réplica estática: un pliegue nunca sale abierto en el HTML)</p><div class="fold-body"><div class="prose"><p>El contenido plegado está en el HTML desde el principio y se abre solo al llegar por su ancla.</p></div></div></div>
+    <details class="fold"><summary class="kit-focus">Con foco de teclado</summary><div class="fold-body"><p>Contenido de muestra del pliegue con foco, para el UI kit.</p></div></details>
+  </div>
+
+  <div class="col"><p class="kit-label">Galería con foto principal y cuatro (tira en estrecho, al lado desde 900 px)</p></div>
+  <Gallery block={azotea} ui={c.ui} />
+
+  <div class="col"><p class="kit-label">Estancias: tarjeta normal y la última impar, ancha</p></div>
+  <Rooms block={piso} ui={c.ui} />
+
+  <div class="col"><p class="kit-label">Mapa: puntos, portal, anillos, rótulos y la lista</p></div>
+  <MapIcons />
+  <div class="band">
+    <div class="kit-row">
+      {["transporte", "compras", "barrio", "plaza", "parque", "salud"].map((i) => (
+        <span class="map-pin" style="position:relative;transform:none"><svg class="icon"><use href={`#i-${i}`} /></svg></span>
+      ))}
+      <span class="map-pin is-portal" style="position:relative;transform:none"><svg class="icon"><use href="#i-casa" /></svg></span>
+    </div>
+    <p class="kit-label">Estado vacío: sin base de OpenStreetMap, el mapa sale con anillos y puntos sobre el fondo, y la lista sigue completa</p>
+    <figure class="map kit-map-empty" style="max-width:28rem">
+      <svg viewBox="-1200 -1050 2400 1800" aria-hidden="true">{barrio.data.rings.map((m) => <circle class="ring" cx="0" cy="0" r={m * 66} />)}</svg>
+      <span class="map-pin is-portal" style="left:50%;top:58.3%"><svg class="icon"><use href="#i-casa" /></svg></span>
+      <span class="map-attr">{barrio.data.attribution}</span>
+    </figure>
+  </div>
+
+  <div class="col"><p class="kit-label">Zona oscura: conexiones</p></div>
+  <Connections block={block("08-1-conexiones", "connections")} />
+
+  <div class="col">
+    <p class="kit-label">Llamada a idealista: un componente. Sobre papel: normal, hover, activo, foco</p>
+    <div class="kit-row">
+      <a class="cta" href={datos.idealista_url}>{c.cta_text}</a>
+      <a class="cta kit-hover" href={datos.idealista_url}>{c.cta_text}</a>
+      <a class="cta kit-active" href={datos.idealista_url}>{c.cta_text}</a>
+      <a class="cta kit-focus" href={datos.idealista_url}>{c.cta_text}</a>
+    </div>
+    <p class="kit-label">Botón flotante sobre la foto (desde 600 px), con el anillo doble de foco</p>
+  </div>
+  <div class="band">
+    <div class="grid md:grid-cols-2 gap-3">
+      <div class="kit-photo-under"><Image src={azotea.data.main.src} alt={plain(azotea.data.main.alt)} widths={[640]} sizes="34rem" /><a class="cta" href={datos.idealista_url}>{c.cta_text}</a></div>
+      <div class="kit-photo-under"><Image src={azotea.data.main.src} alt={plain(azotea.data.main.alt)} widths={[640]} sizes="34rem" /><a class="cta kit-double" href={datos.idealista_url}>{c.cta_text}</a></div>
+    </div>
+  </div>
+  <div class="col"><p class="kit-label">Barra en estrecho (menos de 600 px) y en zona, con foco</p></div>
+  <div class="cta-bar kit-bar"><a class="cta" href={datos.idealista_url}>{c.cta_text}</a></div>
+  <div class="zone py-6 mt-3"><div class="col kit-row"><a class="cta" href={datos.idealista_url}>{c.cta_text}</a><a class="cta kit-focus" href={datos.idealista_url}>{c.cta_text}</a><a href="#zona">Enlace en zona</a><a href="#zona" class="kit-focus">foco</a></div></div>
+
+  <div class="col"><p class="kit-label">Visor de fotos (estático; el real se abre al tocar cualquier foto de arriba)</p></div>
+  <div class="band">
+    <div class="viewer kit-viewer zone">
+      <div class="viewer-inner">
+        <div class="viewer-top"><span class="viewer-count">1 de 5</span><button type="button" class="kit-focus">{c.ui.close}</button></div>
+        <figure><Image src={azotea.data.main.src} alt={plain(azotea.data.main.alt)} widths={[800]} sizes="40rem" /></figure>
+        <div class="viewer-bottom"><button type="button" aria-label={c.ui.previous}>&#8592;</button><p class="viewer-cap">{azotea.data.main.caption}</p><button type="button" aria-label={c.ui.next}>&#8594;</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <p class="kit-label">Estados de error</p>
+    <p class="small">No hay formularios ni entradas de datos: la web no tiene estados de error que pintar. Los errores de contenido rompen el build (esquema, término fuera del glosario, bloque que falta).</p>
+  </div>
+
+  <section class="zone final" id="idealista"><div class="col"><h2 class="h-subtitle">{c.final_title}</h2><div class="prose"><p>Llamada final: aquí aterriza la barra.</p></div></div></section>
+  <CtaBar href={datos.idealista_url} text={c.cta_text} label={c.cta_label} />
+  <SiteFooter signature={c.signature} updatedText={c.updated_text} date={formatDate(datos.updated, "es")} />
+  <Viewer ui={c.ui} />
+</Base>

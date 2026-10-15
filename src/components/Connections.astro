@@ -1,0 +1,27 @@
+---
+// Block 8.1, inside #barrio. A dark zone: the time is the figure (E1), destination and mode in text.
+import { render, type CollectionEntry } from "astro:content";
+import { inline } from "../lib/typography.mjs";
+
+interface Props { block: CollectionEntry<"blocks"> }
+const { block } = Astro.props;
+const b = block.data;
+if (b.type !== "connections") throw new Error("Connections expects a connections block");
+const { Content } = await render(block);
+---
+<section id={b.anchor} class="zone zone-block" aria-labelledby={`${b.anchor}-h`}>
+  <div class="col">
+    <h3 class="h-subtitle" id={`${b.anchor}-h`} set:html={inline(b.title)} />
+    <div class="prose"><Content /></div>
+    <ul class="times">
+      {b.times.map((t) => (
+        <li>
+          <span class="figure">{t.minutes}<small>{"\u00A0"}{b.unit}</small></span>{" "}
+          <span class="dest" set:html={inline(t.destination)} />{" "}
+          <span class="small" set:html={inline(t.mode)} />
+        </li>
+      ))}
+    </ul>
+    <p class="small" set:html={inline(b.source)} />
+  </div>
+</section>

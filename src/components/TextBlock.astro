@@ -1,0 +1,19 @@
+---
+// A heading and running text from the .md body: #incluido, #vivir, #invertir.
+import { render, type CollectionEntry } from "astro:content";
+import { inline } from "../lib/typography.mjs";
+
+interface Props { block: CollectionEntry<"blocks"> }
+const { block } = Astro.props;
+const b = block.data;
+if (b.type !== "text") throw new Error("TextBlock expects a text block");
+const { Content } = await render(block);
+const H = b.level === 2 ? "h2" : "h3";
+---
+<section id={b.anchor} class:list={[b.level === 2 ? "block" : "sub-block"]} aria-labelledby={`${b.anchor}-h`}>
+  <div class="col">
+    <H class:list={[b.level === 2 ? "h-title" : "h-subtitle mt-0", { "is-quiet": b.quiet }]} id={`${b.anchor}-h`} set:html={inline(b.title)} />
+    <div class="prose"><Content /></div>
+    <slot />
+  </div>
+</section>

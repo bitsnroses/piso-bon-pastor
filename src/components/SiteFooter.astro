@@ -1,0 +1,9 @@
+---
+// Block 12. Signature without personal names (E2); the date comes from datos.yaml only.
+import { fill, inline } from "../lib/typography.mjs";
+interface Props { signature: string; updatedText: string; date: string }
+const { signature, updatedText, date } = Astro.props;
+---
+<footer class="zone site-footer">
+  <div class="col small"><span set:html={inline(signature)} />. <span set:html={inline(fill(updatedText, { date }))} /></div>
+</footer>

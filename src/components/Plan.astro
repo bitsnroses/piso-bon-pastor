@@ -1,0 +1,31 @@
+---
+// Block 7. The plan as it is today, enlargeable, with the surfaces in text beside it from 900 px.
+import { render, type CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
+import { inline, plain } from "../lib/typography.mjs";
+
+interface Props { block: CollectionEntry<"blocks">; ui: { enlarge: string } }
+const { block, ui } = Astro.props;
+const b = block.data;
+if (b.type !== "plan") throw new Error("Plan expects a plan block");
+const { Content } = await render(block);
+---
+<section id={b.anchor} class="block" aria-labelledby={`${b.anchor}-h`}>
+  <div class="col">
+    <h2 class="h-title" id={`${b.anchor}-h`} set:html={inline(b.title)} />
+  </div>
+  <div class="band">
+    <div class="plan">
+      <figure data-gallery>
+        <a class="ph plan-ph" href={b.plan.src.src}>
+          <Image src={b.plan.src} alt={plain(b.plan.alt)} widths={[480, 800, 1200]} sizes="(min-width: 68rem) 39rem, (min-width: 56.25rem) 58vw, calc(100vw - 2rem)" />
+          <span class="sr-only">{ui.enlarge}</span>
+        </a>
+      </figure>
+      <div class="prose"><Content /></div>
+    </div>
+  </div>
+  <div class="col">
+    <slot />
+  </div>
+</section>

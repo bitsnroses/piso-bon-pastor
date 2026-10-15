@@ -1,0 +1,17 @@
+---
+// Blocks 11 and the call to action: ONE component, two presentations (E4). The final block closes
+// the page after #ficha; the bar after it is sticky from the first paint and lands here as its button.
+import { render, type CollectionEntry } from "astro:content";
+import { inline } from "../lib/typography.mjs";
+
+interface Props { comun: CollectionEntry<"comun">; href: string }
+const { comun, href } = Astro.props;
+const c = comun.data;
+const { Content } = await render(comun);
+---
+<section id="idealista" class="zone final" aria-labelledby="idealista-h">
+  <div class="col">
+    <h2 class="h-subtitle" id="idealista-h" set:html={inline(c.final_title)} />
+    <div class="prose"><Content /></div>
+  </div>
+</section>

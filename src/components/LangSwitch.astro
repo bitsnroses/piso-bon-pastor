@@ -1,0 +1,24 @@
+---
+// "ES | CA" in the header: to the equivalent page, keeping the anchor (E3 §5.3). Painted only when
+// more than one language is published. The anchor is copied by the script in Base.astro.
+import { getEntry } from "astro:content";
+import { PUBLISHED, ROUTES, url, type Lang } from "../lib/site";
+
+interface Props { current: Lang; langs?: string[] }
+const { current, langs = PUBLISHED } = Astro.props;
+const items = await Promise.all(
+  langs.map(async (l) => {
+    const c = await getEntry("comun", `${l}/comun`);
+    return { lang: l, href: url(ROUTES[l]), label: c?.data.language_label ?? l.toUpperCase(), name: c?.data.language_name ?? l };
+  }),
+);
+---
+{items.length > 1 && (
+  <nav class="lang" aria-label={items.find((i) => i.lang === current)?.name}>
+    {items.map((i) => (
+      i.lang === current
+        ? <span aria-current="true" lang={i.lang}><abbr title={i.name}>{i.label}</abbr></span>
+        : <a href={i.href} hreflang={i.lang} lang={i.lang}><abbr title={i.name}>{i.label}</abbr></a>
+    ))}
+  </nav>
+)}

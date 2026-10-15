@@ -1,0 +1,23 @@
+---
+// Block 3. Price and three figures above the fold in portrait; four secondary facts below.
+import type { CollectionEntry } from "astro:content";
+import { inline } from "../lib/typography.mjs";
+
+interface Props { block: CollectionEntry<"blocks">; price: string }
+const b = Astro.props.block.data;
+if (b.type !== "facts") throw new Error("KeyFacts expects a facts block");
+---
+<section id={b.anchor} class="col" aria-labelledby={`${b.anchor}-h`}>
+  <h2 class="sr-only" id={`${b.anchor}-h`}>{b.title}</h2>
+  <p class="mt-[0.9rem] mb-3"><span class="figure-xl">{Astro.props.price}</span></p>
+  <ul class="figures">
+    {b.figures.map((f) => (
+      <li><span class="figure" set:html={inline(f.value)} />{" "}<span class="small" set:html={inline(f.label)} /></li>
+    ))}
+  </ul>
+  <dl class="facts">
+    {b.facts.map((f) => (
+      <div><dt set:html={inline(f.term)} />{" "}<dd set:html={inline(f.value)} /></div>
+    ))}
+  </dl>
+</section>

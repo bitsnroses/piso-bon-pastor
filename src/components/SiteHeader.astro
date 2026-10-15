@@ -1,0 +1,14 @@
+---
+// Block 1. A "notch": the logo centred in a tab fixed to the top edge, over the cover photos,
+// answering the CTA bar at the bottom (owner, E8). No menu (E3). The language switcher sits
+// beside the logo, and is not painted until /ca/ exists (E3 §3).
+interface Props { logo: string; label: string; home: string; variant?: "zone" | "paper"; fixed?: boolean }
+const { logo, label, home, variant = "zone", fixed = true } = Astro.props;
+const cut = logo.lastIndexOf(" ");
+const street = logo.slice(0, cut);
+const number = logo.slice(cut + 1);
+---
+<header class:list={["notch", { "is-paper": variant === "paper", "is-static": !fixed }]}>
+  <a class="logo" href={home} aria-label={label}>{street} <b>{number}</b></a>
+  <slot name="lang" />
+</header>

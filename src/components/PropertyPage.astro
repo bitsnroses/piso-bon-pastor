@@ -1,0 +1,74 @@
+---
+// The property page, the same for every language: / now, /ca/ after the first publication
+// (ADR-001 §7.2). Block order is E3's (information-architecture.md §4.1) and is fixed here.
+import Base from "../layouts/Base.astro";
+import SiteHeader from "./SiteHeader.astro";
+import Cover from "./Cover.astro";
+import KeyFacts from "./KeyFacts.astro";
+import Gallery from "./Gallery.astro";
+import Fold from "./Fold.astro";
+import Rooms from "./Rooms.astro";
+import TextBlock from "./TextBlock.astro";
+import Plan from "./Plan.astro";
+import Neighbourhood from "./Neighbourhood.astro";
+import Connections from "./Connections.astro";
+import FinalCall from "./FinalCall.astro";
+import CtaBar from "./CtaBar.astro";
+import SiteFooter from "./SiteFooter.astro";
+import Viewer from "./Viewer.astro";
+import LangSwitch from "./LangSwitch.astro";
+import { formatDate, formatPrice, loadPage, locales, url, type Lang } from "../lib/site";
+import { plain } from "../lib/typography.mjs";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const { datos, pagina, comun, block } = await loadPage(lang);
+const c = comun.data;
+const price = formatPrice(datos.price, lang);
+const home = url(lang === "es" ? "/" : `/${lang}/`);
+const ficha = block("10-ficha", "fold");
+---
+<Base
+  lang={lang}
+  locale={locales[lang].replace("-", "_")}
+  title={pagina.title}
+  description={`${price}. ${plain(pagina.description)}`}
+  canonical={new URL(home, Astro.site)}
+  ogImage={pagina.og_image}
+  ogAlt={plain(pagina.og_alt)}
+>
+  <div class="cta-scope">
+    <SiteHeader logo={c.logo} label={c.logo_label} home={`${home}#inicio`}><LangSwitch current={lang} slot="lang" /></SiteHeader>
+    <main>
+      <Cover block={block("02-portada", "cover")} />
+      <KeyFacts block={block("03-datos", "facts")} price={price} />
+      <Gallery block={block("04-salon", "gallery")} ui={c.ui} />
+      <Gallery block={block("05-azotea", "gallery")} ui={c.ui}>
+        <Fold block={block("05-1-escritura", "fold")} ui={c.ui} />
+      </Gallery>
+      <Rooms block={block("06-piso", "rooms")} ui={c.ui}>
+        <TextBlock block={block("06-1-incluido", "text")} />
+      </Rooms>
+      <Plan block={block("07-plano", "plan")} ui={c.ui}>
+        <Fold block={block("07-1-tercera-habitacion", "fold")} ui={c.ui} />
+      </Plan>
+      <Neighbourhood block={block("08-barrio", "neighbourhood")} portal={datos.portal}>
+        <Connections block={block("08-1-conexiones", "connections")} />
+        <TextBlock block={block("08-2-vivir", "text")} />
+      </Neighbourhood>
+      <TextBlock block={block("09-invertir", "text")}>
+        <Fold block={block("09-1-invertir-datos", "fold")} ui={c.ui} />
+      </TextBlock>
+      <section class="sub-block" aria-labelledby="ficha-h">
+        <div class="col">
+          <h2 class="sr-only" id="ficha-h">{ficha.data.title}</h2>
+          <Fold block={ficha} ui={c.ui} />
+        </div>
+      </section>
+      <FinalCall comun={comun} href={datos.idealista_url} />
+    </main>
+    <CtaBar href={datos.idealista_url} text={c.cta_text} label={c.cta_label} />
+  </div>
+  <SiteFooter signature={c.signature} updatedText={c.updated_text} date={formatDate(datos.updated, lang)} />
+  <Viewer ui={c.ui} />
+</Base>

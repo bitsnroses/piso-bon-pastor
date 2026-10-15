@@ -1,0 +1,33 @@
+---
+// Blocks 4 and 5, same template and same weight (E3): heading, text, an optional fold that
+// qualifies the text (#escritura), then 1 main photo + 4. Below 900 px the four go in a strip
+// that scrolls sideways with snap; from 900 px they sit beside the main photo, 2 × 2 (E7).
+import { render, type CollectionEntry } from "astro:content";
+import Photo from "./Photo.astro";
+import { fill, inline } from "../lib/typography.mjs";
+
+interface Props { block: CollectionEntry<"blocks">; ui: { enlarge: string; more_photos: string } }
+const { block, ui } = Astro.props;
+const b = block.data;
+if (b.type !== "gallery") throw new Error("Gallery expects a gallery block");
+const { Content } = await render(block);
+---
+<section id={b.anchor} class="block" aria-labelledby={`${b.anchor}-h`}>
+  <div class="col">
+    <h2 class="h-title" id={`${b.anchor}-h`} set:html={inline(b.title)} />
+    <div class="prose"><Content /></div>
+    <slot />
+  </div>
+  <div class="band">
+    <div class="gallery" data-gallery>
+      <div class="main">
+        <Photo photo={b.main} sizes="(min-width: 68rem) 43rem, (min-width: 56.25rem) 63vw, calc(100vw - 2rem)" enlarge={ui.enlarge} />
+      </div>
+      <ul class="more" tabindex="0" aria-label={fill(ui.more_photos, { title: b.title })}>
+        {b.more.map((p) => (
+          <li><Photo photo={p} sizes="(min-width: 56.25rem) 16rem, (min-width: 37.5rem) 38vw, 64vw" enlarge={ui.enlarge} /></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>

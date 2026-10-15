@@ -1,0 +1,6 @@
+---
+// The bar / floating button. Same tab on purpose: a new tab gets lost in WhatsApp's browser (E3 §5.4).
+interface Props { href: string; text: string; label: string }
+const { href, text, label } = Astro.props;
+---
+<div class="cta-bar"><a class="cta" href={href} aria-label={label}>{text}</a></div>

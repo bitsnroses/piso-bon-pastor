@@ -1,0 +1,11 @@
+# Independent of the language: one value for /, and for /ca/ when it exists (ADR-001 §7.3).
+# Change the price or a figure here and update "updated": the footer date and the link
+# preview read from this file.
+piso:
+  price: 279000
+  updated: 2026-10-12
+  idealista_url: https://www.idealista.com/inmueble/112724805/
+  # The portal as Google Maps gives it, checked in E5 (content/tiempos-fuentes.md in the workspace).
+  portal:
+    lat: 41.4354577
+    lon: 2.2031379

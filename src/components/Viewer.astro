@@ -1,0 +1,17 @@
+---
+// The photo viewer: one <dialog> for the whole page, zone surface (E7). Esc closes, arrows move,
+// focus returns to the photo that opened it. The script lives in Base.astro.
+interface Props { ui: { viewer: string; close: string; previous: string; next: string; count: string } }
+const { ui } = Astro.props;
+---
+<dialog class="viewer" aria-label={ui.viewer} data-count={ui.count}>
+  <div class="viewer-inner">
+    <div class="viewer-top"><span class="viewer-count" aria-live="polite"></span><button type="button" class="viewer-close">{ui.close}</button></div>
+    <figure><img alt={ui.viewer} /></figure>
+    <div class="viewer-bottom">
+      <button type="button" class="viewer-prev" aria-label={ui.previous}>&#8592;</button>
+      <p class="viewer-cap"></p>
+      <button type="button" class="viewer-next" aria-label={ui.next}>&#8594;</button>
+    </div>
+  </div>
+</dialog>
