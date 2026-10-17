@@ -1,6 +1,7 @@
 # Build and publish to GitHub Pages (ADR-001 §7.1). The same steps as in local, on purpose:
 # Node from .nvmrc, npm ci from the lockfile, astro build with the base in the environment.
-# Pages source must be "GitHub Actions" (Settings > Pages); E10 switches it on.
+# Pages source must be "GitHub Actions" (Settings > Pages). Content, privacy and link checks need the
+# private workspace, so they run there (scripts/prepublish.sh) before each push; the job summary says so.
 name: Deploy
 
 on:
@@ -37,7 +38,14 @@ jobs:
           restore-keys: astro-assets-
       - run: npm ci
       - run: npm run build
-      - uses: actions/upload-pages-artifact@v4
+      - name: Checks not run here
+        run: |
+          {
+            echo "### Checks not run in this workflow"
+            echo "Content, privacy and link checks need the private workspace. Whoever edits runs \`scripts/prepublish.sh\` there, green, before every push to this repository."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Checks not run here::Content, privacy and link checks run in the private workspace (scripts/prepublish.sh) before each push."
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -49,4 +57,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
