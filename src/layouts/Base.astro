@@ -4,6 +4,7 @@ import "../styles/global.css";
 import instrumentSans from "@fontsource-variable/instrument-sans/files/instrument-sans-latin-wdth-normal.woff2?url";
 import { getImage } from "astro:assets";
 import type { ImageMetadata } from "astro";
+import { url } from "../lib/site";
 
 interface Props {
   lang: string;
@@ -28,6 +29,11 @@ const og = ogImage ? await getImage({ src: ogImage, width: 1200, height: 630, fi
     <meta name="description" content={description} />
     <meta name="robots" content="noindex" />
     <link rel="canonical" href={canonical.href} />
+    <link rel="icon" href={url("/favicon.ico")} sizes="32x32" />
+    <link rel="icon" href={url("/favicon.svg")} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={url("/apple-touch-icon.png")} />
+    <link rel="manifest" href={url("/site.webmanifest")} />
+    <meta name="theme-color" content="#2B2320" />
     <link rel="preload" href={instrumentSans} as="font" type="font/woff2" crossorigin />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content={locale} />
