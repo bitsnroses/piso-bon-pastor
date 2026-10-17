@@ -13,8 +13,9 @@ interface Props {
   canonical: URL;
   ogImage?: ImageMetadata;
   ogAlt?: string;
+  bodyClass?: string;
 }
-const { lang, locale, title, description, canonical, ogImage, ogAlt } = Astro.props;
+const { lang, locale, title, description, canonical, ogImage, ogAlt, bodyClass } = Astro.props;
 // Link preview (block 0): 1200 × 630 from the first cover photo. E9 checks it in WhatsApp.
 const og = ogImage ? await getImage({ src: ogImage, width: 1200, height: 630, fit: "cover", format: "jpeg", quality: 80 }) : null;
 ---
@@ -39,7 +40,7 @@ const og = ogImage ? await getImage({ src: ogImage, width: 1200, height: 630, fi
     {og && ogAlt && <meta property="og:image:alt" content={ogAlt} />}
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body>
+  <body class={bodyClass}>
     <slot />
     <script is:inline>
       (function () {

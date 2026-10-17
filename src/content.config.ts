@@ -154,4 +154,14 @@ const blocks = defineCollection({
     ]),
 });
 
-export const collections = { datos, paginas, comun, blocks };
+// The 404 page (E9): title, one line and the link back to the property. Not named 404.md, which the blocks pattern would take.
+const errores = defineCollection({
+  loader: glob({ base: "./src/content", pattern: "*/no-encontrada.md" }),
+  schema: z.object({
+    title: text,
+    description: text,
+    link_text: text,
+  }),
+});
+
+export const collections = { datos, paginas, comun, blocks, errores };

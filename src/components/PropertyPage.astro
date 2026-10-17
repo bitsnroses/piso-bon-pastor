@@ -26,7 +26,6 @@ const { datos, pagina, comun, block } = await loadPage(lang);
 const c = comun.data;
 const price = formatPrice(datos.price, lang);
 const home = url(lang === "es" ? "/" : `/${lang}/`);
-const ficha = block("10-ficha", "fold");
 ---
 <Base
   lang={lang}
@@ -59,12 +58,9 @@ const ficha = block("10-ficha", "fold");
       <TextBlock block={block("09-invertir", "text")}>
         <Fold block={block("09-1-invertir-datos", "fold")} ui={c.ui} />
       </TextBlock>
-      <section class="sub-block" aria-labelledby="ficha-h">
-        <div class="col">
-          <h2 class="sr-only" id="ficha-h">{ficha.data.title}</h2>
-          <Fold block={ficha} ui={c.ui} />
-        </div>
-      </section>
+      <TextBlock block={block("10-ficha", "text")}>
+        <Fold block={block("10-1-ficha-datos", "fold")} ui={c.ui} />
+      </TextBlock>
       <FinalCall comun={comun} href={datos.idealista_url} />
     </main>
     <CtaBar href={datos.idealista_url} text={c.cta_text} label={c.cta_label} />

@@ -1,0 +1,43 @@
+---
+// The 404 page (E9, build-notes §3). Only existing pieces: the notch, a title block and the footer.
+// The link is a plain text link: lime belongs to the idealista component only (ADR-002 §4.3).
+// The page fills the window, so the footer sits at its bottom edge at the highest.
+// GitHub Pages serves it for any missing path under the site, so every URL here carries the base.
+import { getEntry, render } from "astro:content";
+import Base from "../layouts/Base.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { formatDate, loadPage, locales, url } from "../lib/site";
+import { inline, plain } from "../lib/typography.mjs";
+
+const lang = "es";
+const { datos, pagina, comun } = await loadPage(lang);
+const c = comun.data;
+const entry = await getEntry("errores", `${lang}/no-encontrada`);
+if (!entry) throw new Error(`Missing ${lang}/no-encontrada.md`);
+const e = entry.data;
+const { Content } = await render(entry);
+const home = url("/");
+---
+<Base
+  lang={lang}
+  locale={locales[lang].replace("-", "_")}
+  title={plain(e.title)}
+  description={plain(e.description)}
+  canonical={new URL(home, Astro.site)}
+  ogImage={pagina.og_image}
+  ogAlt={plain(pagina.og_alt)}
+  bodyClass="flex min-h-svh flex-col"
+>
+  <SiteHeader logo={c.logo} label={c.logo_label} home={home} />
+  <main class="block flex-1 pb-16">
+    <div class="col">
+      <h1 class="h-title" set:html={inline(e.title)} />
+      <div class="prose">
+        <Content />
+        <p><a href={home}>{e.link_text}</a></p>
+      </div>
+    </div>
+  </main>
+  <SiteFooter signature={c.signature} updatedText={c.updated_text} date={formatDate(datos.updated, lang)} />
+</Base>

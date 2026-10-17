@@ -1,7 +1,8 @@
 ---
 // Block 2. The cover slot (E4): a diptych of the two halves of the character, living room and
 // rooftop, with no motion (E7). 4:3 in portrait, full height under the header in landscape.
-import { Image } from "astro:assets";
+// AVIF with a WebP fallback, as in Photo.astro (E9, build-notes §1).
+import { Picture } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 import { inline, plain } from "../lib/typography.mjs";
 
@@ -12,9 +13,11 @@ if (b.type !== "cover") throw new Error("Cover expects a cover block");
 <section id={b.anchor} aria-labelledby="titular">
   <div class="cover-photos">
     {b.photos.map((p) => (
-      <Image
+      <Picture
         src={p.src}
         alt={plain(p.alt)}
+        formats={["avif"]}
+        fallbackFormat="webp"
         widths={[360, 540, 720, 960, 1280]}
         sizes="50vw"
         loading="eager"

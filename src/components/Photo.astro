@@ -1,7 +1,9 @@
 ---
 // One photo: a link to the large version (opened in the <dialog> viewer when JavaScript runs),
 // the responsive image, and its caption. The most repeated component of the page (E3 §8).
-import { Image, getImage } from "astro:assets";
+// AVIF at quality 60 (astro.config.mjs) with a WebP fallback: 28 % lighter than WebP alone at the same measured sharpness (E9, build-notes §1).
+// The large version stays WebP: a link cannot negotiate formats.
+import { Picture, getImage } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import { inline, plain } from "../lib/typography.mjs";
 
@@ -18,9 +20,11 @@ const alt = plain(photo.alt);
 ---
 <figure>
   <a class="ph" href={large.src} data-caption={photo.caption ? plain(photo.caption) : undefined}>
-    <Image
+    <Picture
       src={photo.src}
       alt={alt}
+      formats={["avif"]}
+      fallbackFormat="webp"
       widths={[400, 640, 960, 1280]}
       sizes={sizes}
       loading={eager ? "eager" : "lazy"}

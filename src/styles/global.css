@@ -131,6 +131,10 @@
   a:hover { text-decoration-thickness: 2px; }
   .zone a { color: var(--color-on-zone-link); }
   img { max-width: 100%; height: auto; display: block; }
+  /* Photos are <picture> (AVIF with a WebP fallback, E9): the wrapper must not change the layout of its <img>. */
+  picture { display: contents; }
+  /* With the wrapper gone, <source> would become a grid cell of its own (the cover diptych): it is never drawn. */
+  picture > source { display: none; }
   /* <sup>2</sup> and <sub>2</sub>: half size, 200 heavier than the text around, line height untouched (ADR-002 §6.5) */
   sup, sub { font-size: 50%; line-height: 0; position: relative; vertical-align: baseline; font-weight: 600; }
   sup { top: -0.8em; }
@@ -340,20 +344,19 @@
   .cta:hover { text-decoration: none; }
   .cta:hover::after { transform: translateX(3px); }
   .cta:active { transform: translateY(1px); }
-  .zone .cta, .cta-bar .cta { color: var(--color-on-brand); border-color: var(--color-brand); }
+  .zone .cta { color: var(--color-on-brand); border-color: var(--color-brand); }
+  .cta-bar .cta { color: var(--color-on-brand); }
   /* The bar is the LAST child of .cta-scope, which starts at the top of the page and ends with the
      final block: visible from the first paint, it lands as the final block's button (E4). */
   .cta-scope { position: relative; }
-  .cta-bar { position: sticky; bottom: 0; z-index: 20; height: 54px; padding: 5px 1rem; background: var(--color-zone); border-top: 1px solid var(--color-on-zone-rule); display: flex; align-items: center; justify-content: center; }
-  .cta-bar .cta { width: 100%; max-width: var(--container-col); }
-  .cta-bar .cta:focus-visible { outline-color: var(--color-on-zone-focus); }
+  /* Floating button at every width (E9, owner's review: an earth bar under it looked detached in iOS 26, whose bottom bar turns translucent). The scope paints the zone under its landing spot so it lands inside the final block. Full column width in narrow screens, its own width from 600 px. */
+  .cta-scope { background: linear-gradient(to top, var(--color-zone) 72px, transparent 72px); }
+  .cta-bar { position: sticky; bottom: 0; z-index: 20; display: flex; align-items: center; justify-content: center; pointer-events: none; padding: 0 1rem 1rem; }
+  .cta-bar .cta { pointer-events: auto; width: 100%; max-width: var(--container-col); border-color: var(--color-brand-edge); box-shadow: var(--shadow-float); }
+  /* Over a photo neither ring color is guaranteed: double ring, ink inside, paper outside (ADR-002 §7). */
+  .cta-bar .cta:focus-visible { outline: 3px solid var(--color-arena-950); outline-offset: 0; box-shadow: 0 0 0 5px var(--color-arena-50), var(--shadow-float); }
   @media (width >= 37.5rem) {
-    /* Floating button. The scope paints the zone under its landing spot so it lands inside the final block. */
-    .cta-scope { background: linear-gradient(to top, var(--color-zone) 72px, transparent 72px); }
-    .cta-bar { background: transparent; border-top: 0; pointer-events: none; padding: 0 1rem 1rem; height: auto; }
-    .cta-bar .cta { pointer-events: auto; width: auto; min-width: 16rem; border-color: var(--color-brand-edge); box-shadow: var(--shadow-float); }
-    /* Over a photo neither ring color is guaranteed: double ring, ink inside, paper outside (ADR-002 §7). */
-    .cta-bar .cta:focus-visible { outline: 3px solid var(--color-arena-950); outline-offset: 0; box-shadow: 0 0 0 5px var(--color-arena-50), var(--shadow-float); }
+    .cta-bar .cta { width: auto; min-width: 16rem; }
   }
   .final { margin-top: 4rem; padding-block: 3rem 1rem; }
   .final .h-subtitle { margin-top: 0; }
